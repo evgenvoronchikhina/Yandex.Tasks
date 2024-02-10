@@ -9,9 +9,13 @@ class GenreAdmin(admin.ModelAdmin):
 class GenreFilmworkInline(admin.TabularInline):
     model = GenreFilmwork
 
+class PersonFilmworkInline(admin.TabularInline):
+    model = PersonFilmwork
+
 
 @admin.register(Filmwork)
 class FilmworkAdmin(admin.ModelAdmin):
+    inlines = (GenreFilmworkInline,PersonFilmworkInline,)
     # Отображение полей в списке
     list_display = ('title', 'type', 'creation_date', 'rating', 'created', 'modified')
 
@@ -24,8 +28,4 @@ class FilmworkAdmin(admin.ModelAdmin):
     
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
-    pass  
-
-@admin.register(PersonFilmwork)
-class PersonFilmworkAdmin(admin.ModelAdmin):
     pass  
