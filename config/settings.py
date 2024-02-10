@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'movies.apps.MoviesConfig',
+    'movies_admin.apps.MoviesConfig',
     "debug_toolbar",
 ]
 
@@ -129,7 +129,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOCALE_PATHS = ['movies/locale']
+LOCALE_PATHS = ['movies_admin/locale']
 
 INTERNAL_IPS = [
     "127.0.0.1",
