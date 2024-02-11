@@ -67,8 +67,8 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('role', models.TextField(verbose_name='role')),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('film_work', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.filmwork')),
-                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.person')),
+                ('film_work', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies_admin.filmwork')),
+                ('person', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies_admin.person')),
             ],
             options={
                 'db_table': 'content"."person_film_work',
@@ -79,8 +79,8 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('film_work', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.filmwork')),
-                ('genre', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.genre')),
+                ('film_work', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies_admin.filmwork')),
+                ('genre', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies_admin.genre')),
             ],
             options={
                 'db_table': 'content"."genre_film_work',
@@ -89,11 +89,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='filmwork',
             name='genres',
-            field=models.ManyToManyField(through='movies.GenreFilmwork', to='movies.genre'),
+            field=models.ManyToManyField(through='movies_admin.GenreFilmwork', to='movies_admin.genre'),
         ),
         migrations.AddField(
             model_name='filmwork',
             name='persons',
-            field=models.ManyToManyField(through='movies.PersonFilmwork', to='movies.person'),
+            field=models.ManyToManyField(through='movies_admin.PersonFilmwork', to='movies_admin.person'),
         ),
     ]

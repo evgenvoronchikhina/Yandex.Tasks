@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class TimeStampedMixin(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         # Этот параметр указывает Django, что этот класс не является представлением таблицы
@@ -40,7 +40,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
 class GenreFilmwork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "content\".\"genre_film_work"
@@ -64,6 +64,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     title = models.TextField(_('title'), blank=False)
     description = models.TextField(_('description'), blank=True)
     creation_date = models.DateField(_('creation_date'), blank=True)
+    file_path = models.TextField(_('file_path'), blank=True, null=True)
     rating = models.FloatField(_('rating'), blank=True,
                                validators=[MinValueValidator(0),
                                            MaxValueValidator(100)])
@@ -87,7 +88,7 @@ class PersonFilmwork(UUIDMixin):
     film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
     person = models.ForeignKey('Person', on_delete=models.CASCADE)
     role = models.TextField(_('role'))
-    created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         db_table = "content\".\"person_film_work"
