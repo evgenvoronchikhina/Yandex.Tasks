@@ -1,12 +1,18 @@
-from dataclasses import dataclass, fields, astuple
+from dataclasses import dataclass, fields, asdict, astuple
 from contextlib import contextmanager  
 from abc import ABC, abstractclassmethod
 from pathlib import Path
 from uuid import uuid4
+from dotenv import load_dotenv
 import json
 import sqlite3
 import os
 import psycopg2
+from psycopg2.extras import execute_batch
+from datetime import datetime
+
+
+load_dotenv('./config/.env')
 
 
 class DataClassTableName(ABC):
@@ -30,40 +36,49 @@ def conn_context(db_path: str):
 def extract_data_from_sqlite(conn, data_class: DataClassTableName):
     curs = conn.cursor()
     curs.execute(f"SELECT * FROM {data_class.get_table_name()};")
-    data = curs.fetchall()
-    path_to_file = f'tmp_{data_class.get_table_name()}.json'
-    Path(path_to_file).parent.mkdir(exist_ok=True, parents=True)
-    with open(path_to_file, 'w') as tmp_tile:
-        json.dump([dict(i) for i in data], tmp_tile)
+    cnt = 0
+    while (len(data := curs.fetchmany(1000)) > 0):
+        path_to_file = f'tmp_{data_class.get_table_name()}_{str(cnt := cnt + 1)}.json'
+        Path(path_to_file).parent.mkdir(exist_ok=True, parents=True)
+        with open(path_to_file, 'w') as tmp_tile:
+            json.dump([dict(i) for i in data], tmp_tile)
+        
     
 def load_to_postgres(conn, data_class: DataClassTableName, trunc=False):
-    path_to_file = f'tmp_{data_class.get_table_name()}.json'
-    with open(path_to_file) as f:
-        data = json.load(f)
-    with conn.cursor() as cursor:
-        if trunc:
-            cursor.execute(f"""TRUNCATE content.{data_class.get_table_name()} CASCADE""")
-        column_names = [field.name for field in fields(data_class)]
-        column_names_str = ', '.join(column_names)
-        col_count = ', '.join(['%s'] * len(column_names))
-        for i in range(len(data) // 1000 + (len(data) % 1000 > 0)):
-            args = ','.join(cursor.mogrify(f"({col_count})", astuple(data_class(**item))).decode('utf-8') 
-                            for item in data[i*1000: (i+1)*1000])
-            cursor.execute(f"""
-            INSERT INTO content.{data_class.get_table_name()} ({column_names_str})
-            VALUES {args}
-            ON CONFLICT (id) DO NOTHING
-            """)
-    os.remove(path_to_file)
+    # path_to_file = f'tmp_{data_class.get_table_name()}.json'
+    for i, path_to_file in enumerate([i for i in Path('./').iterdir() if f'tmp_{data_class.get_table_name()}' in i.name]):
+        with open(path_to_file) as f:
+            data = json.load(f)
+        with conn.cursor() as cursor:
+            if trunc and i == 0:
+                cursor.execute(f"""TRUNCATE content.{data_class.get_table_name()} CASCADE""")
+            # column_names = [field.name for field in fields(data_class)]
+            column_names_str = ', '.join([field.name for field in fields(data_class)])
+            col_name_in_val = ', '.join([f'%({field.name})s' for field in fields(data_class)])
+            # col_count = ', '.join(['%s'] * len(column_names))
+            # for i in range(len(data) // 1000 + (len(data) % 1000 > 0)):
+            #     args = ','.join(cursor.mogrify(f"({col_count})", astuple(data_class(**item))).decode('utf-8') 
+            #                     for item in data[i*1000: (i+1)*1000])
+            execute_batch(cursor, f"""INSERT INTO content.{data_class.get_table_name()} ({column_names_str})
+                            VALUES(
+                                {col_name_in_val}
+                            );
+                            """, [asdict(data_class(**item)) for item in data])
+                # cursor.execute(f"""
+                # INSERT INTO content.{data_class.get_table_name()} ({column_names_str})
+                # VALUES {args}
+                # ON CONFLICT (id) DO NOTHING
+                # """)
+        os.remove(path_to_file)
 
 def sqlite_to_postgres(list_data_classes):
     db_path = '.\\sqlite_to_postgres\\db.sqlite'
     dsn = {
-        'dbname': 'movies_database',
-        'user': 'app',
-        'password': '123qwe',
-        'host': 'localhost',
-        'port': 5432,
+        'dbname': os.getenv('DB_NAME'),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'host': os.getenv('DB_HOST'),
+        'port': os.getenv('DB_PORT'),
         'options': '-c search_path=content',
     }
     for i in list_data_classes:
@@ -139,6 +154,9 @@ class PersonFilmWork(DataClassTableName):
     def get_table_name(cls):
         return 'person_film_work'
     
-        
-sqlite_to_postgres([FilmWork, Genre, Person, GenreFilmWork, PersonFilmWork])
+
+if __name__ == '__main__':
+    a = datetime.now()
+    sqlite_to_postgres([FilmWork, Genre, Person, GenreFilmWork, PersonFilmWork])
+    print(datetime.now() - a)
 

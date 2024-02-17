@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from psqlextra.indexes import UniqueIndex
 
 from django.utils.translation import gettext_lazy as _
 
@@ -33,17 +34,8 @@ class Genre(UUIDMixin, TimeStampedMixin):
         # Ваши таблицы находятся в нестандартной схеме. Это нужно указать в классе модели
         db_table = "content\".\"genre"
         # Следующие два поля отвечают за название модели в интерфейсе
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
-        
-   
-class GenreFilmwork(UUIDMixin):
-    film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
-    genre = models.ForeignKey('Genre', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = "content\".\"genre_film_work"
+        verbose_name = _('Genre')
+        verbose_name_plural = _('Genres')
         
         
 class Person(UUIDMixin, TimeStampedMixin):
@@ -56,9 +48,9 @@ class Person(UUIDMixin, TimeStampedMixin):
         # Ваши таблицы находятся в нестандартной схеме. Это нужно указать в классе модели
         db_table = "content\".\"person"
         # Следующие два поля отвечают за название модели в интерфейсе
-        verbose_name = 'Актеры'
-        verbose_name_plural = 'Актеры'
-
+        verbose_name = _('Actors')
+        verbose_name_plural = _('Actors')
+        
 
 class Filmwork(UUIDMixin, TimeStampedMixin):
     title = models.TextField(_('title'), blank=False)
@@ -77,18 +69,41 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         # Ваши таблицы находятся в нестандартной схеме. Это нужно указать в классе модели
         db_table = "content\".\"film_work"
         # Следующие два поля отвечают за название модели в интерфейсе
-        verbose_name = 'Кинопроизведения'
-        verbose_name_plural = 'Кинопроизведения'
+        verbose_name = _('film_work')
+        verbose_name_plural = _('film_work')
     
     genres = models.ManyToManyField(Genre, through='GenreFilmwork')
     persons = models.ManyToManyField(Person, through='PersonFilmwork')
+        
+   
+class GenreFilmwork(UUIDMixin):
+    film_work = models.ForeignKey(Filmwork, on_delete=models.CASCADE)
+    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "content\".\"genre_film_work"
     
     
 class PersonFilmwork(UUIDMixin):
-    film_work = models.ForeignKey('Filmwork', on_delete=models.CASCADE)
-    person = models.ForeignKey('Person', on_delete=models.CASCADE)
-    role = models.TextField(_('role'))
+    film_work = models.ForeignKey(Filmwork, on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE)
+    # role = models.TextField(_('role'))
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    class RoleInFilm(models.TextChoices):
+        ACTOR = 'actor', _('actor')
+        DIRECTOR = 'director', _('director')
+        WRITER = 'writer', _('writer')
+
+    role = models.CharField(
+        choices=RoleInFilm.choices,
+        default=RoleInFilm.ACTOR,
+    )
     
     class Meta:
         db_table = "content\".\"person_film_work"
+        indexes = [
+            UniqueIndex(fields=['film_work', 'person', 'role'], name="film_work_person_idx"),
+            models.Index(fields=['created_at'], name="film_work_creation_date_idx")
+        ]

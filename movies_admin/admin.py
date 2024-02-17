@@ -17,7 +17,7 @@ class PersonFilmworkInline(admin.TabularInline):
 class FilmworkAdmin(admin.ModelAdmin):
     inlines = (GenreFilmworkInline,PersonFilmworkInline,)
     # Отображение полей в списке
-    list_display = ('title', 'type', 'creation_date', 'rating', 'created_at', 'updated_at')
+    list_display = ('title', 'type', 'creation_date', 'rating', 'created_at', 'updated_at') 
 
     # Фильтрация в списке
     list_filter = ('type',)
