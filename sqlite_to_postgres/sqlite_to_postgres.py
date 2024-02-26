@@ -12,7 +12,7 @@ from psycopg2.extras import execute_batch
 from datetime import datetime
 
 
-load_dotenv('./config/.env')
+load_dotenv('./app/config/.env')
 
 
 class DataClassTableName(ABC):
@@ -72,7 +72,7 @@ def load_to_postgres(conn, data_class: DataClassTableName, trunc=False):
         os.remove(path_to_file)
 
 def sqlite_to_postgres(list_data_classes):
-    db_path = '.\\sqlite_to_postgres\\db.sqlite'
+    db_path = '.\\app\\sqlite_to_postgres\\db.sqlite'
     dsn = {
         'dbname': os.getenv('DB_NAME'),
         'user': os.getenv('DB_USER'),
