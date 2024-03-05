@@ -1,10 +1,25 @@
 import uuid
 from django.db import models
+from django.db.models import Aggregate
 from django.core.validators import MinValueValidator, MaxValueValidator
 from psqlextra.indexes import UniqueIndex
 
 from django.utils.translation import gettext_lazy as _
 
+
+class Concat(Aggregate):
+    function = 'string_agg'
+    template = "%(function)s(%(field)s::text, ',')"
+    allow_distinct = True
+
+    def __init__(self, expression, all_values=False, **extra):
+        if 'filter_role' in extra.keys():
+            self.template = f"%(function)s(case when \"content\".\"person_film_work\".\"role\" = '{extra['filter_role']}' then %(field)s::text else null end, ',')"
+        super().__init__(
+            expression,
+            all_values='ALL ' if all_values else '',
+            **extra
+        )
 
 
 class TimeStampedMixin(models.Model):
