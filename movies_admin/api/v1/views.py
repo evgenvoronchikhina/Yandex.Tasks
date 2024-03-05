@@ -52,9 +52,9 @@ class MoviesListApi(MoviesApiMixin, BaseListView):
                 elem[col] = self.get_distinct_list(elem[col])
 
         return {'count': paginator.count, 
-            'total_pages':paginator.count // self.paginate_by + (paginator.count % self.paginate_by > 0),
-            'prev':1,
-            'next':2,
+            'total_pages': paginator.num_pages,
+            'prev': page.number,
+            'next': page.number + 1,
             'results': res
         } 
 
@@ -65,9 +65,6 @@ class MoviesListApi(MoviesApiMixin, BaseListView):
 class MoviesDetailApi(MoviesApiMixin, BaseDetailView):
 
     def get_context_data(self, **kwargs):
-        # queryset = self.get_queryset().filter(uuid=kwargs['pk']).values()
-        # queryset = self.get_queryset()
-        # return  # Словарь с данными объекта
         res = kwargs['object']
         for col in self.agg_cols.keys():
             res[col] = self.get_distinct_list(res[col])
