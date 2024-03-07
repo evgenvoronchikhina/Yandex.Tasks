@@ -5,6 +5,7 @@ from django.views.generic.list import BaseListView
 from django.views.generic.detail import BaseDetailView
 
 from movies_admin.models import Filmwork, Concat
+from config.settings import PAGINATE_BY
 
 
 class MoviesApiMixin:
@@ -37,13 +38,12 @@ class MoviesApiMixin:
 
 
 class MoviesListApi(MoviesApiMixin, BaseListView):
-    paginate_by = 50
 
     def get_context_data(self, *, object_list=None, **kwargs):
         queryset = self.get_queryset()
         paginator, page, queryset, is_paginated = self.paginate_queryset(
             queryset, 
-            self.paginate_by
+            PAGINATE_BY
         )
 
         res = list(queryset)

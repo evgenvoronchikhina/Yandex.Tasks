@@ -12,7 +12,7 @@ from psycopg2.extras import execute_batch
 from datetime import datetime
 
 
-load_dotenv('./app/config/.env')
+load_dotenv('./app/config/.env.example')
 
 
 class DataClassTableName(ABC):

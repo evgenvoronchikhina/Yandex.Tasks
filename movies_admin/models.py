@@ -1,9 +1,9 @@
 import uuid
+
 from django.db import models
 from django.db.models import Aggregate
 from django.core.validators import MinValueValidator, MaxValueValidator
 from psqlextra.indexes import UniqueIndex
-
 from django.utils.translation import gettext_lazy as _
 
 
