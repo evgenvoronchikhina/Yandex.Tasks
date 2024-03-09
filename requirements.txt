@@ -1,5 +1,8 @@
 django==4.2.5
-flake8==6.1.0  # Разумеется, вам потребуется линтер :)
+flake8==6.1.0
+elasticsearch==7.15.2
+pydantic
+pydantic-settings
 python-dotenv
 django-split-settings
 django-debug-toolbar
