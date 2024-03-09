@@ -64,8 +64,12 @@ def etl_data_migration(pg_cursor, es_conn):
 
 
 if __name__ == "__main__":
+    try:
+        ElasticsearchService().create_index()
+    except:
+        logger.error("Can't create index")
     while True:
-        logger.error("Start migration")
+        logger.info("Start migration")
         try:
             es_conn = ElasticsearchService()
             with PostgresConnector().connection as postgres_conn:
