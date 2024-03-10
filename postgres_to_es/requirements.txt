@@ -1,0 +1,5 @@
+elasticsearch==7.15.2
+pydantic
+pydantic-settings
+python-dotenv
+psycopg2

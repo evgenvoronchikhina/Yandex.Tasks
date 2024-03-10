@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ElasticsearchService:
     """Class to work with Elasticsearch engine"""
+    create_schema = True
 
     def __init__(self, es_settings=es_data, index_name: str = "movies"):
         self.client = Elasticsearch(
@@ -25,8 +26,12 @@ class ElasticsearchService:
             self.client.indices.create(
                 index=self.index_name, **index_settings, ignore=ignore_http_response
             )
+        self.__class__.create_schema = False
+        logger.info(f"Schema created")
 
     def migrate_data(self, actions) -> None:
+        if self.create_schema:
+            self.create_index()
         lines, status = bulk(
             client=self.client,
             actions=[

@@ -7,11 +7,10 @@ def query_part_for_where(data: Union[list, tuple]) -> str:
     """Query constructor for WHERE operator"""
     if len(data) > 1:
         return f"IN {tuple(data)}"
-    else:
-        return f"= '{data[0]}'"
+    return f"= '{data[0]}'"
 
 
-def query_updated_film_works(datetime_value) -> str:
+def query_updated_film_works(datetime_value: str) -> str:
     """Return updated film works, after specific datetime"""
     return f"""
         SELECT id, updated_at
@@ -22,7 +21,7 @@ def query_updated_film_works(datetime_value) -> str:
     """
 
 
-def query_updated_genres(datetime_value) -> str:
+def query_updated_genres(datetime_value: str) -> str:
     """Return updated genres, after specific datetime"""
     return f"""
         SELECT id, updated_at
@@ -45,7 +44,7 @@ def query_film_works_by_genres(genre_ids: list) -> str:
     """
 
 
-def query_updated_persons(datetime_value) -> str:
+def query_updated_persons(datetime_value: str) -> str:
     """Return updated persons, after specific datetime"""
     return f"""
         SELECT id, updated_at
